@@ -3,7 +3,7 @@ import uuid
 import csv
 import time
 import logging
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from io import StringIO
 from fastapi import FastAPI, File, UploadFile, HTTPException
 import requests
@@ -11,6 +11,12 @@ import requests
 app = FastAPI()
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+
+@app.get("/", status_code=200)
+async def landing():
+    """Basic landing / health endpoint returning OK."""
+    return {"status": "ok"}
 
 HOSPITAL_API_BASE = "https://hospital-directory.onrender.com"
 MAX_CSV_SIZE = int(os.getenv("MAX_CSV_SIZE", 20))
@@ -21,7 +27,7 @@ def validate_csv_headers(headers: List[str]) -> bool:
         return False
     return REQUIRED_HEADERS.issubset(set(headers))
 
-async def parse_csv_file(contents: bytes) -> tuple[List[Dict], List[str]]:
+async def parse_csv_file(contents: bytes) -> Tuple[List[Dict], List[str]]:
     try:
         text = contents.decode('utf-8')
         reader = csv.DictReader(StringIO(text))
